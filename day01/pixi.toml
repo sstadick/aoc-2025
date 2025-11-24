@@ -1,0 +1,27 @@
+[workspace]
+authors = ["Seth Stadick <sstadick@gmail.com>"]
+channels = [
+    "https://prefix.dev/conda-forge",
+    "https://conda.modular.com/max-nightly",
+    "https://repo.prefix.dev/modular-community",
+]
+platforms = ["linux-64"]
+preview = ["pixi-build"]
+
+[package]
+name = "day01"
+version = "0.1.0"
+
+[package.build]
+backend = { name = "pixi-build-mojo", version = "0.*", channels = [
+    "https://prefix.dev/pixi-build-backends",
+    "https://prefix.dev/conda-forge",
+    "https://repo.prefix.dev/modular-community",
+] }
+
+[tasks]
+r = "mojo run -debug-level=line-tables main.mojo"
+
+[dependencies]
+mojo = "=0.25.7"
+extramojo = "=0.19"

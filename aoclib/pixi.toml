@@ -1,0 +1,36 @@
+[workspace]
+authors = ["Seth Stadick <sstadick@gmail.com>"]
+channels = [
+    "https://prefix.dev/conda-forge",
+    "https://conda.modular.com/max-nightly",
+    "https://repo.prefix.dev/modular-community",
+]
+platforms = ["linux-64"]
+preview = ["pixi-build"]
+
+[package]
+name = "aoclib"
+version = "0.1.0"
+
+[package.build]
+backend = { name = "pixi-build-mojo", version = "0.*" }
+channels = [
+    "https://prefix.dev/pixi-build-backends",
+    "https://prefix.dev/conda-forge",
+    "https://repo.prefix.dev/modular-community",
+]
+
+[package.host-dependencies]
+mojo-compiler = "=0.25.7"
+
+[package.build-dependencies]
+mojo-compiler = "=0.25.7"
+
+[package.run-dependencies]
+mojo-compiler = "=0.25.7"
+
+[tasks]
+p = "mojo package ./src -o aoclib.mojopkg"
+
+[dependencies]
+mojo = "=0.25.7"
