@@ -3,5 +3,6 @@
 !.pixi/config.toml
 small.txt
 large.txt
+big.txt
 kgen*
 main
