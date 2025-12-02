@@ -1,3 +1,5 @@
+from algorithm.functional import parallelize
+
 from aoclib.parse import span_to_int
 from extramojo.bstr.bstr import SplitIterator
 
@@ -26,12 +28,20 @@ def part_a():
                 sum += x
     print(sum)
 
+
+@register_passable
+@fieldwise_init
+struct StartStop(ImplicitlyCopyable, Movable):
+    var start: UInt64 # Inclusive
+    var stop: UInt64 # Inclusive
+
 def part_b():
     var fh = open("./big.txt", "r")
     var bytes = fh.read_bytes()
 
-    var sum: UInt64 = 0
-    var buffer = String()
+    var ranges = List[StartStop]()
+    var sums = List[UInt64]()
+
     for rng in SplitIterator(bytes, ord(",")):
         var iter = SplitIterator(rng, ord("-"))
         var start = iter.__next__()
@@ -39,26 +49,37 @@ def part_b():
         var start_num = span_to_int[DType.uint64](start)
         var stop_num = span_to_int[DType.uint64](stop)
 
-        for x in range(start_num, stop_num+1):
-            # print(x, ":", bin(x))
+        ranges.append(StartStop(start_num, stop_num))
+
+    sums.resize(len(ranges), 0)
+
+    fn find_repeats(idx: Int) capturing:
+        var rng = ranges[idx]
+        var sum: UInt64 = 0
+        var buffer = String()
+        for x in range(rng.start, rng.stop+1):
             buffer.resize(0)
             x.write_to(buffer)
 
             # Sliding window over the buffer, varying the size
-            for i in range(1, len(buffer)):
+            for i in range(len(buffer)-1, 0, -1):
                 var seq = buffer[0:i]
-                var equal = False
                 for s in range(0, len(buffer), len(seq)):
                     if seq != buffer[s:s+len(seq)]:
                         break
                 else:
-                    equal = True
-                
-                if equal:
                     sum += x
-                    break 
+                    break
+        sums[idx] = sum
+    
+    parallelize[find_repeats](len(ranges))
+    
+    var total: UInt64 = 0
+    for s in sums:
+        total += s
+                
 
-    print(sum)
+    print(total)
 
 
 def main():
