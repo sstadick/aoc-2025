@@ -1,10 +1,18 @@
-from aoclib.parse import span_to_int
+from time import perf_counter
+
 from extramojo.io.buffered import BufferedReader
 from extramojo.bstr.bstr import SplitIterator
 
 alias RIGHT = Direction(False)
 alias LEFT = Direction(True)
 
+@always_inline
+fn span_to_int(span: Span[UInt8]) -> Int32:
+    var acc: Int32 = 0
+    for b in span:
+        # print(acc, b)
+        acc = (acc * 10) + (Int32(b) - 48)
+    return acc
 
 @fieldwise_init
 struct Direction(Copyable, ImplicitlyCopyable, Movable):
@@ -76,7 +84,7 @@ struct UpdatedPos(ImplicitlyCopyable, Movable):
     var times_zero: Int
 
 
-def part_a():
+def part_a() -> Int:
     var fh = open("./big.txt", "r")
     var reader = BufferedReader(fh^)
     var buffer = List[UInt8](capacity=16)
@@ -90,10 +98,10 @@ def part_a():
         pos = combo.update_pos(pos)
         count += Int(pos == 0)
         buffer.clear()
-    print(count)
+    return count
 
 
-def part_b():
+def part_b() -> Int:
     var fh = open("./big.txt", "r")
     var reader = BufferedReader(fh^)
     var buffer = List[UInt8](capacity=16)
@@ -108,8 +116,11 @@ def part_b():
         pos = updated.new_pos
         count += updated.times_zero
         buffer.clear()
-    print(count)
+    return count
 
 
 def main():
-    part_b()
+    var start = perf_counter()
+    var count = part_b()
+    var end = perf_counter()
+    print(count, "in", end - start)
