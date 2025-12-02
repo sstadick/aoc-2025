@@ -3,21 +3,34 @@ from algorithm.functional import parallelize
 from aoclib.parse import span_to_int
 from extramojo.bstr.bstr import SplitIterator
 
+@register_passable
+@fieldwise_init
+struct StartStop(ImplicitlyCopyable, Movable):
+    var start: UInt64 # Inclusive
+    var stop: UInt64 # Inclusive
 
 def part_a():
     var fh = open("./big.txt", "r")
     var bytes = fh.read_bytes()
 
-    var sum: UInt64 = 0
-    var buffer = String()
+    var ranges = List[StartStop]()
+    var sums = List[UInt64]()
+
     for rng in SplitIterator(bytes, ord(",")):
         var iter = SplitIterator(rng, ord("-"))
         var start = iter.__next__()
         var stop = iter.__next__()
         var start_num = span_to_int[DType.uint64](start)
         var stop_num = span_to_int[DType.uint64](stop)
+        ranges.append(StartStop(start_num, stop_num))
 
-        for x in range(start_num, stop_num+1):
+    sums.resize(len(ranges), 0)
+
+    fn count_invalids(idx: Int) capturing:
+        var sum: UInt64 = 0
+        var buffer = String()
+        var rng = ranges[idx]
+        for x in range(rng.start, rng.stop+1):
             buffer.resize(0)
             x.write_to(buffer)
             if len(buffer) % 2 != 0:
@@ -26,14 +39,16 @@ def part_a():
 
             if buffer[0:midpoint] == buffer[midpoint:]:
                 sum += x
-    print(sum)
+        sums[idx] = sum
+
+    parallelize[count_invalids](len(ranges))
+    var total: UInt64 = 0
+    for s in sums:
+        total += s
+
+    print(total)
 
 
-@register_passable
-@fieldwise_init
-struct StartStop(ImplicitlyCopyable, Movable):
-    var start: UInt64 # Inclusive
-    var stop: UInt64 # Inclusive
 
 def part_b():
     var fh = open("./big.txt", "r")
@@ -83,4 +98,5 @@ def part_b():
 
 
 def main():
-    part_b()
+    part_a()
+    # part_b()
